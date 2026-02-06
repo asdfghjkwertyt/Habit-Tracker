@@ -22,7 +22,8 @@
       "buildResources": "assets"
     },
     "win": {
-      "target": ["nsis"]
+      "target": ["nsis"],
+      "icon": "assets/icon.ico"
     }
     ,
     "nsis": {
