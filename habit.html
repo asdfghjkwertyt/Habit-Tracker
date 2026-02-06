@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Habit Tracker Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Modern Habit Tracker Pro</h1>
+                    <p>Build consistency, one day at a time</p>
+                </div>
+            </div>
+
+            <div id="categorySummary" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;"></div>
+            
+            <div class="header-actions">
+                <label class="theme-toggle">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider">
+                        <i class="fas fa-sun"></i>
+                        <i class="fas fa-moon"></i>
+                    </span>
+                </label>
+                
+                <button class="icon-btn header-icon-btn" id="notificationBtn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="icon-badge" id="notificationBadge">0</span>
+                </button>
+
+                <button class="icon-btn header-icon-btn" id="settingsBtn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+
+                <button class="btn btn-export" id="exportBtn">
+                    <i class="fas fa-file-excel"></i> Export
+                </button>
+            </div>
+        </header>
+        
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-page="dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </button>
+            <button class="nav-tab" data-page="habits">
+                <i class="fas fa-tasks"></i> My Habits
+            </button>
+            <button class="nav-tab" data-page="calendar">
+                <i class="fas fa-calendar-alt"></i> Calendar
+            </button>
+            <button class="nav-tab" data-page="stats">
+                <i class="fas fa-chart-pie"></i> Statistics
+            </button>
+            <button class="nav-tab" data-page="gamification">
+                <i class="fas fa-trophy"></i> Achievements
+            </button>
+            <button class="nav-tab" data-page="goals">
+                <i class="fas fa-bullseye"></i> Goals
+            </button>
+            <button class="nav-tab" data-page="focus" id="focusModeBtn">
+                <i class="fas fa-circle"></i> Focus Mode
+            </button>
+        </div>
+        
+        <!-- Dashboard Page -->
+        <div class="page-container active" id="dashboard-page">
+            <div class="card progress-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-line"></i> Today's Progress
+                    </div>
+                    <span id="todayDate">Today, Feb 4 2026</span>
+                </div>
+                
+                <div class="progress-info">
+                    <div class="progress-stats">
+                        <span id="completedCount">0</span> of <span id="totalCount">0</span> habits completed
+                        <span id="progressPercent" style="float: right;">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-value" id="dashboardTotalHabits">0</div>
+                    <div class="summary-label">Total Habits</div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-value" id="dashboardCompletedToday">0</div>
+                    <div class="summary-label">Completed Today</div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-value" id="dashboardBestStreak">0</div>
+                    <div class="summary-label">Best Streak</div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-value" id="dashboardMissedToday">0</div>
+                    <div class="summary-label">Missed Today</div>
+                </div>
+            </div>
+            
+            <div class="card quote-card">
+                <div class="quote-text" id="dailyQuote">
+                    "The secret of getting ahead is getting started."
+                </div>
+                <div class="quote-author" id="quoteAuthor">- Mark Twain</div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-bolt"></i> Quick Actions
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <button class="btn btn-primary" id="quickAddBtn">
+                            <i class="fas fa-plus"></i> Add New Habit
+                        </button>
+                        <button class="btn btn-accent" id="checkAllBtn">
+                            <i class="fas fa-check-double"></i> Mark All Complete
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-bell"></i> Upcoming Reminders
+                        </div>
+                    </div>
+                    <div id="remindersList">
+                        <p style="text-align: center; padding: 20px; color: var(--gray);">
+                            No reminders set for today
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-bullseye"></i> Goal Progress
+                        </div>
+                    </div>
+                    <div id="dashboardGoalsSummary">
+                        <p style="text-align: center; padding: 20px; color: var(--gray);">No goals yet. <a href="javascript:void(0)" onclick="document.querySelector('[data-page=goals]').click();" style="color: var(--primary); text-decoration: underline;">Create one</a></p>
+                    </div>
+                </div>
+        </div>
+        
+        <!-- Habits Page -->
+        <div class="page-container" id="habits-page">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-plus-circle"></i> Add New Habit
+                    </div>
+                </div>
+                
+                <form class="add-habit-form" id="addHabitForm">
+                    <!-- Main habit name input -->
+                    <div class="form-group">
+                        <input type="text" class="habit-input" id="habitInput" placeholder="What habit do you want to build?" required>
+                    </div>
+
+                    <!-- Row 1: Category and Goal -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select id="habitCategorySelect" class="form-control">
+                                <option value="">Select category...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Link to Goal</label>
+                            <select id="habitGoalSelect" class="form-control">
+                                <option value="">Choose a goal...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Target Value and Unit (Quantitative) -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Target Value (optional)</label>
+                            <input type="number" id="habitTargetValue" class="form-control" placeholder="e.g., 8" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unit</label>
+                            <input type="text" id="habitTargetUnit" class="form-control" placeholder="e.g., glasses, hours, km">
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Add Category -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">New Category</label>
+                            <input type="text" id="newCategoryInput" class="form-control" placeholder="Create a new category...">
+                        </div>
+                        <div class="form-group" style="justify-content: flex-end;">
+                            <button type="button" class="btn" id="addCategoryBtn" style="background: var(--primary); color:white; margin-top: auto;">
+                                <i class="fas fa-plus"></i> Add Category
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 700;">
+                        <i class="fas fa-plus-circle"></i> Add Habit
+                    </button>
+                </form>
+                
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-list-check"></i> My Habits
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <select id="categoryFilter" class="form-control" style="max-width:200px;"></select>
+                        <span id="habitsCount">0 habits</span>
+                    </div>
+                </div>
+                
+                <ul class="habits-list" id="habitsList">
+                    <!-- Habits will be added here dynamically -->
+                </ul>
+                
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>No habits yet</h3>
+                    <p>Start building good habits by adding your first one above!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Calendar Page -->
+        <div class="page-container" id="calendar-page">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-calendar"></i> Habit Calendar
+                    </div>
+                    <button class="btn btn-accent" id="todayBtn">
+                        <i class="fas fa-calendar-day"></i> Today
+                    </button>
+                </div>
+                
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" id="prevYearBtn">
+                            <i class="fas fa-angle-double-left"></i>
+                        </button>
+                        <button class="calendar-nav-btn" id="prevMonthBtn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="current-month" id="currentMonth">February 2026</div>
+                        <button class="calendar-nav-btn" id="nextMonthBtn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="calendar-nav-btn" id="nextYearBtn">
+                            <i class="fas fa-angle-double-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-key"></i> Legend
+                    </div>
+                </div>
+                <div id="legendContainer">
+                    <!-- Legend will be generated here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistics Page -->
+        <div class="page-container" id="stats-page">
+            <div class="stats-container">
+                <div class="stat-card stat-1">
+                    <div class="stat-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="stat-value" id="totalHabits">0</div>
+                    <div class="stat-label">Total Habits</div>
+                </div>
+                
+                <div class="stat-card stat-2">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value" id="completedToday">0</div>
+                    <div class="stat-label">Completed Today</div>
+                </div>
+                
+                <div class="stat-card stat-3">
+                    <div class="stat-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-value" id="currentStreak">0</div>
+                    <div class="stat-label">Current Streak (days)</div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 30px;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-bar"></i> Monthly Completion Rate
+                    </div>
+                </div>
+                <div id="completionChart">
+                    <p style="text-align: center; padding: 40px; color: var(--gray);">
+                        Completion chart will appear here when you have more data
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 30px;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-smile"></i> Mood Tracking
+                    </div>
+                </div>
+                <div id="moodAnalytics" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 16px;">
+                    <!-- Mood cards will be generated here -->
+                </div>
+                <div id="moodCorrelation" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <h4 style="font-weight: 600; margin-bottom: 12px;">Mood vs Habits Completed</h4>
+                    <div id="moodHabitCorrelation" style="font-size: 14px; color: var(--gray);">
+                        Complete more journal entries to see correlations
+                    </div>
+                </div>
+            </div>
+            
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-th"></i> Yearly Heatmap
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <select id="heatmapMode" class="form-control" style="max-width:160px;">
+                                <option value="overall">Overall</option>
+                                <option value="individual">Individual Habit</option>
+                            </select>
+                            <select id="heatmapHabitSelect" class="form-control" style="max-width:220px; display:none;"></select>
+                        </div>
+                    </div>
+                    <div style="padding:16px;">
+                        <div id="heatmapLegend" style="margin-bottom:8px; font-size:13px; color:var(--gray);">No activity → Light gray · Low → Light green · Medium → Green · High → Dark green</div>
+                        <div id="heatmapContainer" style="overflow:auto;"></div>
+                        <div id="heatmapTooltip" style="position:fixed; display:none; padding:8px 10px; background:var(--card-bg); border:1px solid var(--border-color); box-shadow:var(--shadow); border-radius:8px; font-size:13px; z-index:9999;"></div>
+                    </div>
+                </div>
+        </div>
+        
+        <!-- Goals Page -->
+        <div class="page-container" id="goals-page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="font-size: 28px; font-weight: 700;"><i class="fas fa-bullseye"></i> My Goals</h2>
+                <button class="btn btn-primary" id="addGoalBtn">
+                    <i class="fas fa-plus"></i> New Goal
+                </button>
+            </div>
+            <div id="goalsContainer">
+                <p style="text-align: center; padding: 40px; color: var(--gray);">No goals yet. Create one to get started!</p>
+            </div>
+        </div>
+        
+        <!-- Focus Mode Page -->
+        <div class="page-container" id="focus-page">
+            <div class="focus-mode-container">
+                <div class="focus-mode-header">
+                    <div class="focus-mode-title">
+                        <i class="fas fa-circle"></i> Focus Mode
+                    </div>
+                    <div class="focus-mode-timer" id="focusTimer">25:00</div>
+                    <div class="focus-mode-controls">
+                        <button class="timer-control-btn" id="focusPlayBtn" title="Start timer">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button class="timer-control-btn pause" id="focusPauseBtn" title="Pause timer" style="display: none;">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="timer-control-btn" id="focusResetBtn" title="Reset timer">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                        <button class="exit-focus-btn" id="exitFocusBtn">
+                            <i class="fas fa-times"></i> Exit
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="focus-mode-content">
+                    <!-- Timer Setup -->
+                    <div class="timer-input-group" id="timerSetupGroup">
+                        <div class="timer-input-field">
+                            <label>Minutes</label>
+                            <input type="number" id="timerMinutes" value="25" min="1" max="120">
+                        </div>
+                        <div class="timer-input-field">
+                            <label>Seconds</label>
+                            <input type="number" id="timerSeconds" value="0" min="0" max="59">
+                        </div>
+                        <button class="timer-control-btn" id="setTimerBtn" style="margin-left: 12px;">
+                            <i class="fas fa-check"></i> Set Timer
+                        </button>
+                    </div>
+                    
+                    <!-- Today's Habits -->
+                    <div class="focus-mode-habits" id="focusHabitsContainer">
+                        <!-- Habits will be rendered here -->
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div class="focus-empty-state" id="focusEmptyState">
+                        <div class="focus-empty-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>All caught up!</h3>
+                        <p>You've completed all your habits for today. Great work!</p>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="focus-mode-stats" id="focusStats">
+                        <div class="focus-stat">
+                            <div class="focus-stat-value" id="focusCompletedCount">0</div>
+                            <div class="focus-stat-label">Completed</div>
+                        </div>
+                        <div class="focus-stat">
+                            <div class="focus-stat-value" id="focusTotalCount">0</div>
+                            <div class="focus-stat-label">Total</div>
+                        </div>
+                        <div class="focus-stat">
+                            <div class="focus-stat-value" id="focusPercentage">0%</div>
+                            <div class="focus-stat-label">Progress</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gamification Page -->
+        <div class="page-container" id="gamification-page">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-trophy"></i> Your Progress
+                    </div>
+                    <div class="level-badge" id="levelBadge">
+                        <i class="fas fa-star"></i>
+                        <span>Level <span id="currentLevel">1</span></span>
+                    </div>
+                </div>
+                
+                <div class="xp-container">
+                    <div class="xp-bar">
+                        <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+                        <div class="xp-text" id="xpText">0/100 XP</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-medal"></i> Achievements
+                    </div>
+                    <span id="badgeCount">0/10 unlocked</span>
+                </div>
+                
+                <div class="badges-grid" id="badgesGrid">
+                    <!-- Badges will be generated here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-award"></i> Recent Unlocks
+                    </div>
+                </div>
+                <div id="recentAchievements">
+                    <p style="text-align: center; padding: 20px; color: var(--gray);">
+                        Complete habits to unlock achievements!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+            <!-- Settings Page -->
+            <div class="page-container" id="settings-page">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-cog"></i> Settings & Management
+                        </div>
+                    </div>
+
+                    <!-- Category Management -->
+                    <div style="padding: 20px 0; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 16px; color: var(--text-color); font-weight: 600;">
+                            <i class="fas fa-tags"></i> Manage Categories
+                        </h4>
+                        <div id="categoriesList" style="display: grid; gap: 8px;"></div>
+                    </div>
+
+                    <!-- Theme Settings -->
+                    <div style="padding: 20px 0; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 12px; color: var(--text-color); font-weight: 600;">
+                            <i class="fas fa-palette"></i> Theme
+                        </h4>
+                        <label class="theme-toggle" style="cursor: pointer;">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="slider">
+                                <i class="fas fa-sun"></i>
+                                <i class="fas fa-moon"></i>
+                            </span>
+                            <span style="margin-left: 12px; color: var(--text-color);">Dark Mode</span>
+                        </label>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div style="padding: 20px 0;">
+                        <h4 style="margin-bottom: 12px; color: var(--text-color); font-weight: 600;">
+                            <i class="fas fa-database"></i> Data Management
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+                            <button class="btn btn-primary" id="exportDataBtn" style="width: 100%;">
+                                <i class="fas fa-download"></i> Export Data
+                            </button>
+                            <button class="btn btn-warning" id="resetDataBtn" style="width: 100%;">
+                                <i class="fas fa-redo"></i> Reset All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        <!-- Footer -->
+        <footer>
+            <p>Modern Habit Tracker Pro &copy; 2026 | Your data is stored locally in your browser</p>
+            <p style="margin-top: 8px; font-size: 12px;">
+                <i class="fas fa-shield-alt"></i> No data is sent to any server
+            </p>
+        </footer>
+    </div>
+
+    <!-- Overlay for sidebars -->
+    <div id="sidebarOverlay" class="sidebar-overlay" style="display:none;"></div>
+
+    <!-- Notification Sidebar -->
+    <aside id="notificationSidebar" class="sidebar" aria-hidden="true">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-bell"></i> Notifications</h3>
+            <button class="sidebar-close" id="closeNotifications">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-actions" style="display:flex; gap:8px; margin-bottom:12px;">
+                <button class="btn" id="markAllReadBtn">Mark all read</button>
+                <button class="btn" id="clearNotificationsBtn">Clear</button>
+            </div>
+            <div id="notificationList" class="notifications-list">
+                <!-- Notifications will render here -->
+            </div>
+        </div>
+    </aside>
+
+    <!-- Settings Sidebar -->
+    <aside id="settingsSidebar" class="sidebar" aria-hidden="true">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-cog"></i> Settings</h3>
+            <button class="sidebar-close" id="closeSettings">&times;</button>
+        </div>
+        <div class="sidebar-content" id="settingsSidebarContent">
+            <!-- Settings content will be injected here on init -->
+            <div style="text-align:center; color:var(--gray);">Loading settings…</div>
+        </div>
+    </aside>
+
+    <!-- Edit Habit Modal -->
+    <div class="modal" id="editHabitModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Habit</h3>
+                <button class="close-modal" id="closeEditModal">&times;</button>
+            </div>
+            
+            <form id="editHabitForm">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-control" id="editHabitCategory">
+                        <option value="">Category (optional)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Link to Goal</label>
+                    <select class="form-control" id="editHabitGoals">
+                        <option value="">Select a goal (optional)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Habit Name</label>
+                    <input type="text" class="form-control" id="editHabitName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Frequency</label>
+                    <select class="form-control" id="editFrequencyType">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="custom">Custom Days</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="customDaysContainer" style="display: none;">
+                    <label class="form-label">Select Days</label>
+                    <div class="days-checkbox">
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="customDay" value="0"> Mon
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="customDay" value="1"> Tue
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="customDay" value="2"> Wed
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="customDay" value="3"> Thu
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="customDay" value="4"> Fri
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="customDay" value="5"> Sat
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="customDay" value="6"> Sun
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Quantitative Target (optional)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label class="form-label" style="font-size: 12px; color: var(--gray);">Target Value</label>
+                            <input type="number" id="editTargetValue" class="form-control" placeholder="e.g., 8" min="1" style="padding: 8px 12px;">
+                        </div>
+                        <div>
+                            <label class="form-label" style="font-size: 12px; color: var(--gray);">Unit</label>
+                            <input type="text" id="editTargetUnit" class="form-control" placeholder="e.g., glasses" style="padding: 8px 12px;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="editReminderEnabled">
+                        Enable Daily Reminder
+                    </label>
+                    <input type="time" class="form-control" id="editReminderTime" style="margin-top: 10px;" disabled>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button type="button" class="btn" id="cancelEditBtn" style="flex: 1; background: var(--light-gray); color: var(--text-color);">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Journal Modal -->
+    <div class="modal" id="journalModal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="journalDate">Daily Journal</h3>
+                <button class="close-modal" id="closeJournalModal">&times;</button>
+            </div>
+            
+            <form id="journalForm">
+                <div class="form-group">
+                    <label class="form-label">How are you feeling?</label>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;">
+                        <button type="button" class="mood-btn" data-mood="happy" title="Happy">
+                            <span style="font-size: 28px; margin-bottom: 4px;">😊</span>
+                            <span style="font-size: 12px;">Happy</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="neutral" title="Neutral">
+                            <span style="font-size: 28px; margin-bottom: 4px;">😐</span>
+                            <span style="font-size: 12px;">Neutral</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="sad" title="Sad">
+                            <span style="font-size: 28px; margin-bottom: 4px;">😢</span>
+                            <span style="font-size: 12px;">Sad</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="tired" title="Tired">
+                            <span style="font-size: 28px; margin-bottom: 4px;">😴</span>
+                            <span style="font-size: 12px;">Tired</span>
+                        </button>
+                        <button type="button" class="mood-btn" data-mood="motivated" title="Motivated">
+                            <span style="font-size: 28px; margin-bottom: 4px;">🔥</span>
+                            <span style="font-size: 12px;">Motivated</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="journalMoodInput" value="">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Reflection Notes</label>
+                    <textarea class="form-control" id="journalNote" placeholder="Write your daily reflection, thoughts, or notes..." style="height: 120px; resize: vertical;"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        <i class="fas fa-save"></i> Save Entry
+                    </button>
+                    <button type="button" class="btn" id="cancelJournalBtn" style="flex: 1; background: var(--light-gray); color: var(--text-color);">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>

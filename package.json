@@ -1,0 +1,35 @@
+{
+  "name": "modern-habit-tracker",
+  "version": "1.0.0",
+  "description": "Modern Habit Tracker Pro - desktop (Electron)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.yourcompany.modernhabittracker",
+    "files": [
+      "**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": ["nsis"]
+    }
+    ,
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "ModernHabitTracker-Setup-${version}.${ext}"
+    }
+  }
+}

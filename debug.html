@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Habit Tracker Debug Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test-section { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Habit Tracker Debug & Test</h1>
+    
+    <div class="test-section">
+        <h2>Browser Console Tests</h2>
+        <p>Open the developer console (F12) and run these commands:</p>
+        <code>
+            // Check if journal exists<br>
+            console.log('Journal data:', journal);<br>
+            <br>
+            // Check moodConfig<br>
+            console.log('Mood config:', moodConfig);<br>
+            <br>
+            // Check if function exists<br>
+            console.log('openJournalModal function:', typeof openJournalModal);<br>
+            <br>
+            // Try opening journal for today<br>
+            const today = new Date();<br>
+            const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');<br>
+            openJournalModal(dateStr);<br>
+        </code>
+    </div>
+    
+    <div class="test-section">
+        <h2>Common Issues</h2>
+        <ul>
+            <li><strong>Modal not opening:</strong> Check if #journalModal exists in DOM</li>
+            <li><strong>Mood buttons not working:</strong> Check if .mood-btn elements exist</li>
+            <li><strong>Data not saving:</strong> Check localStorage for 'habitJournal' key</li>
+            <li><strong>Calendar days not clickable:</strong> Verify data-date attribute is present</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Quick Fixes</h2>
+        <p><strong>If nothing works, try:</strong></p>
+        <ol>
+            <li>Hard refresh: Ctrl+Shift+R</li>
+            <li>Clear browser cache</li>
+            <li>Check browser console for JavaScript errors (F12)</li>
+            <li>Verify JavaScript is enabled</li>
+        </ol>
+    </div>
+    
+    <script>
+        // Test if we can access the main file
+        window.testResults = {};
+        
+        window.addEventListener('load', () => {
+            console.log('=== HABIT TRACKER DEBUG TEST ===');
+            
+            // Test 1: Check if functions exist
+            const functions = [
+                'openJournalModal',
+                'closeJournalModalHandler', 
+                'handleJournalSubmit',
+                'updateMoodAnalytics',
+                'selectMood'
+            ];
+            
+            console.log('Checking functions:');
+            functions.forEach(fn => {
+                const exists = typeof window[fn] === 'function';
+                console.log(`  ${fn}: ${exists ? 'OK' : 'MISSING'}`);
+                testResults[fn] = exists;
+            });
+            
+            // Test 2: Check DOM elements
+            console.log('Checking DOM elements:');
+            const elements = ['journalModal', 'journalForm', 'journalDate', 'journalNote', 'journalMoodInput'];
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                const exists = !!el;
+                console.log(`  #${id}: ${exists ? 'OK' : 'MISSING'}`);
+                testResults[id] = exists;
+            });
+            
+            // Test 3: Check data
+            console.log('Checking data:');
+            const journal = JSON.parse(localStorage.getItem('habitJournal')) || {};
+            console.log(`  journal entries: ${Object.keys(journal).length}`);
+            console.log('  Sample journal:', journal);
+        });
+    </script>
+</body>
+</html>
